@@ -1,0 +1,18 @@
+{
+    "version": "0.1.1-poc",
+    "component-defaults": {
+        "provider": {
+            "name": "AWS",
+            "region": "us-east-2"
+        }
+    },
+    "components": [
+        { "type": "block-storage", "name": "draft-textfile-storage", "access": [ "admin", "editor" ] },
+        { "type": "block-storage", "name": "published-textfile-storage", "access": "public" },
+        { "type": "datastore", "name": "workflow-tracking" }
+    ],
+    "roles": [ "author", "proofreader", "approver" ],
+    "assets": [
+        { "name": "textfile", "type": "file" }
+    ]
+}
