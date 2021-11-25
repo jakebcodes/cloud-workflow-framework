@@ -73,16 +73,32 @@
                                 "has-edits":    "$draft-textfile.changed",
                                 "is-proofread": "$(edit-file.input-data.action is Approve)",
                                 "is-declined": "$(edit-file.input-data.action is Decline)",
-                                "head-uri": "$(if draft-textfile.changed  draft-textfile-version.uri)"
+                                "head-uri": "$(if draft-textfile.changed draft-textfile-version.uri)"
                             }
                         }
                     ]
                 },
                 {
                     "name": "publish-file",
-                    "asset": "draft-textfile",
+                    "asset": "draft-textile-version or draft-textfile",
                     "who": "approver",
-                    "user-action": "approve"
+                    "user-action": "approve",
+                    "work": [
+                        { 
+                            "action": "write",
+                            "component": "published-textfile-storage",
+                            "name": "published-textfile", 
+                            "versioned": false
+                        },
+                        {
+                            "action": "modify",
+                            "component": "workflow-record",
+                            "object-mapping": {
+                                "is-published": true,
+                                "head-uri": "$published-textfile.uri"
+                            }
+                        }
+                    ]
                 }
             ]
         }
