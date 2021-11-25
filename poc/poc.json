@@ -1,5 +1,6 @@
 {
     "version": "0.1.1-poc",
+    "base-namespace": "CwfPoc.ApproveTextFileWorkflow",
     "component-defaults": {
         "provider": {
             "name": "AWS",
@@ -14,5 +15,76 @@
     "roles": [ "author", "proofreader", "approver" ],
     "assets": [
         { "name": "textfile", "type": "file" }
+    ],
+    "workflows": [
+        {
+            "name": "publish-file",
+            "steps": [
+                {
+                    "name": "upload-file",
+                    "asset": { "name": "textfile", "type": "textfile" },
+                    "who": [ "author", "user" ],
+                    "user-action": "upload",
+                    "input-data": {
+                        "object-definition": "CwfPoc.ApproveTextFileWorkflow.Models.TextfileApproval",
+                        "fields": [ "description", "title" ]
+                    },
+                    "work": [
+                        { 
+                            "action": "write",
+                            "component": "draft-textfile-storage",
+                            "name": "draft-textfile", 
+                            "versioned": true
+                        },
+                        {
+                            "action": "create",
+                            "component": "workflow-tracking",
+                            "name": "workflow-record",
+                            "object-definition": "CwfPoc.ApproveTextFileWorkflow.Models.TextfileApproval",
+                            "object-mapping": {
+                                "filename": "$textfile.filename",
+                                "head-uri": "$draft-texfile.uri",
+                                "user": "$user.username",
+                                "is-author": "$(user.role is author)",
+                                "submitted": true,
+                                "upload_date": "$now"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "edit-file",
+                    "asset": "draft-textfile",
+                    "who": "proofreader",
+                    "condition": "$(!workflow-record.is-author)",
+                    "user-action": "edit",
+                    "input-data": { "action": ["Approve", "Decline"] },
+                    "work": [
+                        {
+                            "action": "save-version",
+                            "condition": "$draft-textfile.changed",
+                            "component": "draft-textfile",
+                            "name": "draft-textfile-version"
+                        },
+                        {
+                            "action": "modify",
+                            "component": "workflow-record",
+                            "object-mapping": {
+                                "has-edits":    "$draft-textfile.changed",
+                                "is-proofread": "$(edit-file.input-data.action is Approve)",
+                                "is-declined": "$(edit-file.input-data.action is Decline)",
+                                "head-uri": "$(if draft-textfile.changed  draft-textfile-version.uri)"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "publish-file",
+                    "asset": "draft-textfile",
+                    "who": "approver",
+                    "user-action": "approve"
+                }
+            ]
+        }
     ]
 }
