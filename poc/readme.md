@@ -24,3 +24,7 @@ The proof of concept workflow describes the following parts.
 
 * This is a POC prototype. It should be built to be thrown away.
 * At least initially, CWF should be able to work in parallel with Terraform. It should not duplicate any terraform features.
+
+## Notes
+
+Best method reading and writing JSON?
